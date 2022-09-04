@@ -1,0 +1,134 @@
+version: "2.1"
+services:
+  mediatracker-nzbget:
+    image: ghcr.io/linuxserver/nzbget
+    container_name: mediatracker-nzbget
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Brisbane
+    volumes:
+      - ./nzbget/config:/config
+      - ${CONTAINER_DATA}/shared-downloads:/downloads
+    ports:
+      - 6789:6789
+    networks:
+      - mediatracker
+    restart: "no"
+
+  mediatracker-radarr:
+    image: ghcr.io/linuxserver/radarr
+    container_name: mediatracker-radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Brisbane
+      - UMASK_SET=022 #optional
+    volumes:
+      - ./radarr/config:/config
+      - ${CONTAINER_DATA}/radarr/movies:/movies
+      - ${CONTAINER_DATA}/shared-downloads:/downloads
+      - ${CONTAINER_DATA}/shared-deluge-watch:/deluge-watch
+      - ${CONTAINER_DATA}/shared-deluge-downloads:/deluge-downloads
+    ports:
+      - 7878:7878
+    networks:
+      - mediatracker
+    restart: "no"
+    
+  mediatracker-sonarr:
+    image: ghcr.io/linuxserver/sonarr
+    hostname: sonarr
+    container_name: mediatracker-sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Brisbane
+      - UMASK_SET=022
+    volumes:
+      - ./sonarr/config:/config
+      - ${CONTAINER_DATA}/sonarr/tv:/tv
+      - ${CONTAINER_DATA}/shared-downloads:/downloads
+      - ${CONTAINER_DATA}/shared-deluge-watch:/deluge-watch
+      - ${CONTAINER_DATA}/shared-deluge-downloads:/deluge-downloads
+    ports:
+        - 8989:8989
+    networks:
+      - mediatracker
+    restart: "no"
+
+  mediatracker-syncthing:
+    image: ghcr.io/linuxserver/syncthing
+    container_name: mediatracker-syncthing
+    hostname: syncthing #optional
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Brisbane
+    volumes:
+      - ./syncthing/config:/config
+      - ${CONTAINER_DATA}/shared-deluge-watch:/deluge-watch
+      - ${CONTAINER_DATA}/shared-deluge-downloads:/deluge-downloads
+    ports:
+      - 8384:8384
+      - 22000:22000
+      - 21027:21027/udp
+    networks:
+      - mediatracker
+    restart: "no"
+    
+  mediatracker-jackett:
+    image: ghcr.io/linuxserver/jackett
+    container_name: mediatracker-jackett
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Brisbane
+      - AUTO_UPDATE=true #optional
+      #- RUN_OPTS=<run options here> #optional
+    volumes:
+      - ./jackett/config:/config
+      - ${CONTAINER_DATA}/jackett/blackhole:/downloads
+    ports:
+      - 9117:9117
+    networks:
+      - mediatracker
+    restart: "no"
+
+  mediatracker-bazarr:
+    image: ghcr.io/linuxserver/bazarr
+    container_name: mediatracker-bazarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Australia/Brisbane
+    volumes:
+      - ./bazarr/config:/config
+      - ${CONTAINER_DATA}/radarr/movies:/movies #optional
+      - ${CONTAINER_DATA}/sonarr/tv:/tv #optional
+    ports:
+      - 6767:6767
+    networks:
+      - mediatracker
+    restart: "no"
+
+#  media-tracker-jellyfin:
+#    image: jellyfin/jellyfin
+#    container_name: media-tracker-jellyfin
+#    environment:
+#      - PUID=1000
+#      - PGID=1000
+#      - TZ=Australia/Brisbane
+#    volumes:
+#      - ./jellyfin/config:/config
+#      - ${CONTAINER_DATA}/radarr/movies:/data/movies
+#      - ${CONTAINER_DATA}/sonarr/tv:/data/tv
+#    ports:
+#      - 8096:8096
+#    networks:
+#      - mediatracker
+#    restart: "no"
+    
+networks:
+  mediatracker:
+    driver: bridge
