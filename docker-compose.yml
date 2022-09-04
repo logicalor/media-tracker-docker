@@ -1,12 +1,13 @@
 version: "2.1"
 services:
+
   mediatracker-nzbget:
     image: ghcr.io/linuxserver/nzbget
     container_name: mediatracker-nzbget
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Australia/Brisbane
+      - TZ=${TIMEZONE}
     volumes:
       - ./nzbget/config:/config
       - ${CONTAINER_DATA}/shared-downloads:/downloads
@@ -22,14 +23,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Australia/Brisbane
+      - TZ=${TIMEZONE}
       - UMASK_SET=022 #optional
     volumes:
       - ./radarr/config:/config
       - ${CONTAINER_DATA}/radarr/movies:/movies
       - ${CONTAINER_DATA}/shared-downloads:/downloads
-      - ${CONTAINER_DATA}/shared-deluge-watch:/deluge-watch
-      - ${CONTAINER_DATA}/shared-deluge-downloads:/deluge-downloads
+      - ${CONTAINER_DATA}/shared-watch:/watch
+      - ${CONTAINER_DATA}/shared-downloads:/downloads
     ports:
       - 7878:7878
     networks:
@@ -43,14 +44,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Australia/Brisbane
+      - TZ=${TIMEZONE}
       - UMASK_SET=022
     volumes:
       - ./sonarr/config:/config
       - ${CONTAINER_DATA}/sonarr/tv:/tv
       - ${CONTAINER_DATA}/shared-downloads:/downloads
-      - ${CONTAINER_DATA}/shared-deluge-watch:/deluge-watch
-      - ${CONTAINER_DATA}/shared-deluge-downloads:/deluge-downloads
+      - ${CONTAINER_DATA}/shared-watch:/watch
+      - ${CONTAINER_DATA}/shared-downloads:/downloads
     ports:
         - 8989:8989
     networks:
@@ -64,11 +65,11 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Australia/Brisbane
+      - TZ=${TIMEZONE}
     volumes:
       - ./syncthing/config:/config
-      - ${CONTAINER_DATA}/shared-deluge-watch:/deluge-watch
-      - ${CONTAINER_DATA}/shared-deluge-downloads:/deluge-downloads
+      - ${CONTAINER_DATA}/shared-watch:/watch
+      - ${CONTAINER_DATA}/shared-downloads:/downloads
     ports:
       - 8384:8384
       - 22000:22000
@@ -83,7 +84,7 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Australia/Brisbane
+      - TZ=${TIMEZONE}
       - AUTO_UPDATE=true #optional
       #- RUN_OPTS=<run options here> #optional
     volumes:
@@ -94,14 +95,14 @@ services:
     networks:
       - mediatracker
     restart: "no"
-
+   
   mediatracker-bazarr:
     image: ghcr.io/linuxserver/bazarr
     container_name: mediatracker-bazarr
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Australia/Brisbane
+      - TZ=${TIMEZONE}
     volumes:
       - ./bazarr/config:/config
       - ${CONTAINER_DATA}/radarr/movies:/movies #optional
@@ -112,22 +113,22 @@ services:
       - mediatracker
     restart: "no"
 
-#  media-tracker-jellyfin:
-#    image: jellyfin/jellyfin
-#    container_name: media-tracker-jellyfin
-#    environment:
-#      - PUID=1000
-#      - PGID=1000
-#      - TZ=Australia/Brisbane
-#    volumes:
-#      - ./jellyfin/config:/config
-#      - ${CONTAINER_DATA}/radarr/movies:/data/movies
-#      - ${CONTAINER_DATA}/sonarr/tv:/data/tv
-#    ports:
-#      - 8096:8096
-#    networks:
-#      - mediatracker
-#    restart: "no"
+  media-tracker-jellyfin:
+    image: jellyfin/jellyfin
+    container_name: media-tracker-jellyfin
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./jellyfin/config:/config
+      - ${CONTAINER_DATA}/radarr/movies:/data/movies
+      - ${CONTAINER_DATA}/sonarr/tv:/data/tv
+    ports:
+      - 8096:8096
+    networks:
+      - mediatracker
+    restart: "no"
     
 networks:
   mediatracker:
